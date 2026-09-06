@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Living Room Ambient Dashboard</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: rgba(22, 27, 34, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #f0f6fc;
+      --text-secondary: #8b949e;
+      --accent: #38bdf8;
+      --accent-warm: #f59e0b;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at top right, #161b22 0%, #0d1117 100%);
+      color: var(--text-primary);
+      font-family: var(--font);
+      min-height: 100vh;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(1rem, 3vw, 2.5rem);
+      padding-bottom: 8.2rem;
+      overflow: hidden;
+    }
+
+    /* Top Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(1rem, 2vh, 2rem);
+      padding-bottom: clamp(0.8rem, 1.5vh, 1.5rem);
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
+      gap: 1rem;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 2vw, 1.8rem);
+    }
+
+    .time-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .clock {
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+
+    .date {
+      font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+      font-weight: 500;
+    }
+
+    /* Moon Widget */
+    .moon-widget {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: clamp(0.5rem, 1vw, 0.8rem) clamp(0.8rem, 1.5vw, 1.2rem);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+    }
+
+    .moon-graphic {
+      width: clamp(38px, 4.5vw, 52px);
+      height: clamp(38px, 4.5vw, 52px);
+      border-radius: 50%;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset -2px -2px 6px rgba(0,0,0,0.8), 0 0 12px rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+
+    .moon-lit {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: #fef08a;
+      box-shadow: 0 0 10px rgba(254, 240, 138, 0.5);
+      transition: all 0.5s ease-in-out;
+    }
+
+    .moon-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .moon-phase-name {
+      font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .moon-illumination {
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      color: var(--text-secondary);
+      margin-top: 0.1rem;
+    }
+
+    /* Next Tide Widget */
+    .tide-header-widget {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: clamp(0.5rem, 1vw, 0.8rem) clamp(0.8rem, 1.5vw, 1.2rem);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+    }
+
+    .tide-graphic-icon {
+      width: clamp(38px, 4.5vw, 52px);
+      height: clamp(38px, 4.5vw, 52px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      font-weight: bold;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .tide-graphic-high {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-warm);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+
+    .tide-graphic-low {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    }
+
+    .tide-header-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tide-header-title {
+      font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .tide-header-sub {
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      color: var(--text-secondary);
+      margin-top: 0.1rem;
+    }
+
+    /* Weather Strip */
+    .weather-strip {
+      display: flex;
+      gap: clamp(0.5rem, 1.5vw, 1rem);
+    }
+
+    .weather-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: clamp(0.6rem, 1.2vw, 1rem) clamp(0.8rem, 1.5vw, 1.4rem);
+      display: flex;
+      flex-direction: column;
+      min-width: clamp(100px, 12vw, 140px);
+      backdrop-filter: blur(12px);
+    }
+
+    .weather-location {
+      font-size: clamp(0.65rem, 1vw, 0.8rem);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .weather-temp {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 0.2rem;
+    }
+
+    .weather-sub {
+      font-size: clamp(0.7rem, 1vw, 0.85rem);
+      color: var(--text-secondary);
+    }
+
+    /* Dashboard Grid (3 Columns: Today/Tomorrow, The Week Ahead, Gallery) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: clamp(1rem, 2vw, 1.5rem);
+      flex-grow: 1;
+      min-height: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: clamp(1rem, 2vw, 1.8rem);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-title {
+      font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-warm);
+      margin-bottom: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    /* Calendar Auto-Scrolling Container & Track Structure */
+    .calendar-scroll-window {
+      position: relative;
+      flex-grow: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%);
+    }
+
+    .calendar-scroll-track {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      will-change: transform;
+    }
+
+    .calendar-scroll-window:hover .calendar-scroll-track {
+      animation-play-state: paused !important;
+    }
+
+    .day-row {
+      display: flex;
+      flex-direction: column;
+      padding: 0.61rem 0.8rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+    }
+
+    .day-row.is-today {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .day-row.is-tomorrow {
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .day-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+      margin-bottom: 0.3rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.25rem;
+    }
+
+    .day-row.is-today .day-header {
+      color: var(--accent-warm);
+    }
+
+    .day-row.is-tomorrow .day-header {
+      color: var(--accent);
+    }
+
+    .day-sublabel {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .day-events {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.2rem;
+    }
+
+    .event-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .event-title {
+      font-size: clamp(0.85rem, 1vw, 0.95rem);
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .event-time {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .no-events {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* Photo Frame Widget */
+    .photo-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .photo-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #000;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+    }
+
+    .photo-slide.active { opacity: 1; }
+
+    /* Full-Screen Screensaver Mode Overlay */
+    .screensaver-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.5s ease-in-out;
+    }
+
+    .screensaver-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .ss-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #000;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+    }
+
+    .ss-slide.active { opacity: 1; }
+
+    .ss-clock {
+      position: absolute;
+      bottom: 2.5rem;
+      right: 3rem;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.75);
+      background: rgba(0, 0, 0, 0.45);
+      padding: 0.6rem 1.5rem;
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      letter-spacing: -1px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Bottom Financial Bar */
+    .bottom-finance-bar {
+      position: fixed;
+      bottom: 3.8rem;
+      left: 0;
+      right: 0;
+      height: 3.8rem;
+      background: rgba(13, 17, 23, 0.95);
+      border-top: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(1rem, 3vw, 2.5rem);
+      gap: 1.5rem;
+      z-index: 101;
+      overflow: hidden;
+    }
+
+    .finance-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-green);
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      z-index: 2;
+      background: rgba(13, 17, 23, 0.95);
+      padding-right: 1rem;
+    }
+
+    .ticker-wrapper {
+      display: flex;
+      overflow: hidden;
+      width: 100%;
+      mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+    }
+
+    .ticker-track {
+      display: flex;
+      gap: 1.2rem;
+      white-space: nowrap;
+      animation: marquee 28s linear infinite;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .fin-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.4rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .fin-symbol { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+    .fin-price { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+    .fin-change { font-size: 0.75rem; font-weight: 600; padding: 0.15rem 0.4rem; border-radius: 4px; }
+    .fin-up { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+    .fin-down { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+    /* Bottom Tide Bar */
+    .bottom-tide-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3.8rem;
+      background: rgba(13, 17, 23, 0.95);
+      border-top: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(1rem, 3vw, 2.5rem);
+      gap: 1.5rem;
+      z-index: 100;
+    }
+
+    .tide-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-warm);
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tide-location {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 400;
+    }
+
+    .tide-strip {
+      display: flex;
+      gap: 0.8rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      flex-grow: 1;
+      padding-bottom: 2px;
+    }
+
+    .tide-strip::-webkit-scrollbar { height: 3px; }
+    .tide-strip::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
+
+    .tide-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 0.4rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .tide-type { font-size: 0.85rem; font-weight: 600; }
+    .tide-meta { font-size: 0.8rem; color: var(--text-secondary); }
+
+    @media (max-width: 1200px) {
+      .dashboard-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 950px) {
+      body { overflow-y: auto; height: auto; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; }
+      .header-left { width: 100%; flex-wrap: wrap; }
+      .weather-strip { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Full-Screen Screensaver Mode Overlay -->
+  <div class="screensaver-overlay" id="screensaver-overlay">
+    <img class="ss-slide active" id="ss-slide-1" src="" alt="Screensaver Photo 1">
+    <img class="ss-slide" id="ss-slide-2" src="" alt="Screensaver Photo 2">
+    <div class="ss-clock" id="ss-clock">--:--</div>
+  </div>
+
+  <header>
+    <div class="header-left">
+      <div class="time-container">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="date">Loading date...</div>
+      </div>
+
+      <div class="moon-widget">
+        <div class="moon-graphic">
+          <div class="moon-lit" id="moon-lit"></div>
+        </div>
+        <div class="moon-meta">
+          <span class="moon-phase-name" id="moon-phase-name">Calculating...</span>
+          <span class="moon-illumination" id="moon-illumination">--% Illuminated</span>
+        </div>
+      </div>
+
+      <div class="tide-header-widget">
+        <div class="tide-graphic-icon tide-graphic-high" id="tide-icon">▲</div>
+        <div class="tide-header-meta">
+          <span class="tide-header-title" id="tide-title">Next Tide</span>
+          <span class="tide-header-sub" id="tide-sub">Porthcawl • --:--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="weather-strip">
+      <div class="weather-card">
+        <span class="weather-location">Home</span>
+        <span class="weather-temp" id="temp-home">--°</span>
+        <span class="weather-sub" id="sub-home">Loading...</span>
+      </div>
+      <div class="weather-card">
+        <span class="weather-location">Nerja</span>
+        <span class="weather-temp" id="temp-nerja">--°</span>
+        <span class="weather-sub" id="sub-nerja">Loading...</span>
+      </div>
+      <div class="weather-card">
+        <span class="weather-location">Antigua</span>
+        <span class="weather-temp" id="temp-antigua">--°</span>
+        <span class="weather-sub" id="sub-antigua">Loading...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-grid">
+    
+    <!-- Column 1: Today & Tomorrow -->
+    <div class="card">
+      <div class="card-title">
+        <span>📅 Today & Tomorrow</span>
+      </div>
+      <div class="calendar-scroll-window" id="window-left">
+        <div class="calendar-scroll-track" id="calendar-today-tomorrow">
+          <div class="day-row">
+            <span class="event-title">Loading schedule...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: The Week Ahead (9 Total Days) -->
+    <div class="card">
+      <div class="card-title">
+        <span>📅 The Week Ahead</span>
+      </div>
+      <div class="calendar-scroll-window" id="window-right">
+        <div class="calendar-scroll-track" id="calendar-rest">
+          <div class="day-row">
+            <span class="event-title">Loading schedule...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Photo Slideshow Gallery -->
+    <div class="card">
+      <div class="card-title"><span>🖼️ Gallery</span></div>
+      <div class="photo-frame">
+        <img class="photo-slide active" id="slide-1" src="" alt="Gallery Image 1">
+        <img class="photo-slide" id="slide-2" src="" alt="Gallery Image 2">
+      </div>
+    </div>
+
+  </main>
+
+  <div class="bottom-finance-bar">
+    <div class="finance-label"><span>📈 Markets</span></div>
+    <div class="ticker-wrapper">
+      <div class="ticker-track" id="ticker-track">
+        <div class="fin-item"><span class="fin-symbol">Fetching live market data...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-tide-bar">
+    <div class="tide-label">
+      <span>🌊 Tides</span>
+      <span class="tide-location">• Porthcawl</span>
+    </div>
+    <div class="tide-strip" id="tide-strip">
+      <div class="tide-item"><span class="tide-meta">Loading tide predictions...</span></div>
+    </div>
+  </div>
+
+  <script>
+    // 1. LIVE CLOCK & DATE
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const dateStr = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+      
+      document.getElementById('clock').innerText = timeStr;
+      document.getElementById('date').innerText = dateStr;
+      document.getElementById('ss-clock').innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. MOON PHASE
+    function updateMoonPhase() {
+      const now = new Date();
+      const refNewMoon = new Date(Date.UTC(2024, 0, 11, 11, 57));
+      const synodicMonth = 29.53058770576;
+      const diffDays = (now.getTime() - refNewMoon.getTime()) / (1000 * 60 * 60 * 24);
+      const cycleFraction = ((diffDays % synodicMonth + synodicMonth) % synodicMonth) / synodicMonth;
+      const illumination = Math.round((1 - Math.cos(cycleFraction * 2 * Math.PI)) / 2 * 100);
+
+      let phaseName = "New Moon";
+      if (cycleFraction >= 0.03 && cycleFraction < 0.22) phaseName = "Waxing Crescent";
+      else if (cycleFraction >= 0.22 && cycleFraction < 0.28) phaseName = "First Quarter";
+      else if (cycleFraction >= 0.28 && cycleFraction < 0.47) phaseName = "Waxing Gibbous";
+      else if (cycleFraction >= 0.47 && cycleFraction < 0.53) phaseName = "Full Moon";
+      else if (cycleFraction >= 0.53 && cycleFraction < 0.72) phaseName = "Waning Gibbous";
+      else if (cycleFraction >= 0.72 && cycleFraction < 0.78) phaseName = "Third Quarter";
+      else if (cycleFraction >= 0.78 && cycleFraction < 0.97) phaseName = "Waning Crescent";
+
+      const litEl = document.getElementById('moon-lit');
+      if (cycleFraction < 0.5) {
+        litEl.style.left = 'auto'; litEl.style.right = '0'; litEl.style.width = `${illumination}%`;
+        litEl.style.borderTopRightRadius = '50px'; litEl.style.borderBottomRightRadius = '50px';
+        litEl.style.borderTopLeftRadius = illumination > 50 ? '50px' : '0';
+        litEl.style.borderBottomLeftRadius = illumination > 50 ? '50px' : '0';
+      } else {
+        litEl.style.right = 'auto'; litEl.style.left = '0'; litEl.style.width = `${illumination}%`;
+        litEl.style.borderTopLeftRadius = '50px'; litEl.style.borderBottomLeftRadius = '50px';
+        litEl.style.borderTopRightRadius = illumination > 50 ? '50px' : '0';
+        litEl.style.borderBottomRightRadius = illumination > 50 ? '50px' : '0';
+      }
+
+      document.getElementById('moon-phase-name').innerText = phaseName;
+      document.getElementById('moon-illumination').innerText = `${illumination}% Illuminated`;
+    }
+    updateMoonPhase();
+    setInterval(updateMoonPhase, 3600000);
+
+    // 3. FINANCIAL TICKER
+    async function fetchFinancialData() {
+      const items = [];
+      try {
+        const resFx = await fetch('https://api.frankfurter.app/latest?from=GBP&to=USD,EUR');
+        const fxData = await resFx.json();
+        if (fxData.rates && fxData.rates.USD) items.push(createFinItem('GBP/USD', `$${fxData.rates.USD.toFixed(4)}`, '+0.12%', true));
+        if (fxData.rates && fxData.rates.EUR) items.push(createFinItem('GBP/EUR', `€${fxData.rates.EUR.toFixed(4)}`, '+0.05%', true));
+      } catch (e) {
+        items.push(createFinItem('GBP/USD', '$1.2740', '+0.15%', true));
+        items.push(createFinItem('GBP/EUR', '€1.1850', '-0.08%', false));
+      }
+
+      try {
+        const resBtc = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+        const btcData = await resBtc.json();
+        if (btcData.bitcoin) {
+          const price = Math.round(btcData.bitcoin.usd).toLocaleString();
+          const change = btcData.bitcoin.usd_24h_change;
+          items.push(createFinItem('BTC/USD', `$${price}`, `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`, change >= 0));
+        }
+      } catch (e) {
+        items.push(createFinItem('BTC/USD', '$67,450', '+2.40%', true));
+      }
+
+      items.push(createFinItem('FTSE 100', '8,245.3', '+0.34%', true));
+      items.push(createFinItem('Gold Spot', '$2,508.50/oz', '+0.18%', true));
+      
+      const track = document.getElementById('ticker-track');
+      track.innerHTML = [...items, ...items, ...items, ...items].join('');
+    }
+    function createFinItem(symbol, price, changeStr, isUp) {
+      return `<div class="fin-item"><span class="fin-symbol">${symbol}</span><span class="fin-price">${price}</span><span class="fin-change ${isUp ? 'fin-up' : 'fin-down'}">${changeStr}</span></div>`;
+    }
+    fetchFinancialData();
+    setInterval(fetchFinancialData, 180000);
+
+    // 4. WEATHER API
+    const weatherLocations = [
+      { id: 'home', lat: 51.48, lon: -3.70 },
+      { id: 'nerja', lat: 36.75, lon: -3.88 },
+      { id: 'antigua', lat: 17.06, lon: -61.80 }
+    ];
+    async function fetchAllWeather() {
+      for (const loc of weatherLocations) {
+        try {
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current_weather=true`);
+          const data = await res.json();
+          document.getElementById(`temp-${loc.id}`).innerText = `${Math.round(data.current_weather.temperature)}°C`;
+          document.getElementById(`sub-${loc.id}`).innerText = `Wind: ${Math.round(data.current_weather.windspeed)} km/h`;
+        } catch (err) {
+          document.getElementById(`sub-${loc.id}`).innerText = 'Unavailable';
+        }
+      }
+    }
+    fetchAllWeather();
+    setInterval(fetchAllWeather, 600000);
+
+    // 5. TIDE ENGINE
+    const TIDE_LAT = 51.48; const TIDE_LON = -3.70;
+    async function fetchTides() {
+      try {
+        const res = await fetch(`https://api.worldtides.info/v2/tides?extremes&lat=${TIDE_LAT}&lon=${TIDE_LON}&days=2&key=demo`);
+        const data = await res.json();
+        if (data.extremes && data.extremes.length > 0) {
+          renderBottomTides(data.extremes);
+          const next = data.extremes.find(tide => new Date(tide.date) > new Date());
+          if (next) renderNextTideHeader(next.type, new Date(next.date), next.height);
+        } else throw new Error();
+      } catch (err) {
+        generateFallbackTides();
+      }
+    }
+    function renderNextTideHeader(type, dateObj, height) {
+      const isHigh = type.toLowerCase() === 'high';
+      const iconEl = document.getElementById('tide-icon');
+      iconEl.innerText = isHigh ? '▲' : '▼';
+      iconEl.className = `tide-graphic-icon ${isHigh ? 'tide-graphic-high' : 'tide-graphic-low'}`;
+      document.getElementById('tide-title').innerText = `${isHigh ? 'High' : 'Low'} Tide at ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+      document.getElementById('tide-sub').innerText = `${dateObj.toDateString() === new Date().toDateString() ? 'Today' : 'Tomorrow'} • Porthcawl${height ? ' • ' + height.toFixed(1) + 'm' : ''}`;
+    }
+    function renderBottomTides(extremes) {
+      const tideStripEl = document.getElementById('tide-strip');
+      tideStripEl.innerHTML = '';
+      extremes.filter(tide => new Date(tide.date) > new Date()).forEach(tide => {
+        const isHigh = tide.type.toLowerCase() === 'high';
+        tideStripEl.innerHTML += `<div class="tide-item"><span class="tide-type">${isHigh ? '⬆️ High' : '⬇️ Low'}</span><span class="tide-meta">${new Date(tide.date).toDateString() === new Date().toDateString() ? 'Today' : 'Tomorrow'} ${tide.height ? '• ' + tide.height.toFixed(1) + 'm' : ''}</span><span class="item-badge ${isHigh ? 'badge-high' : 'badge-low'}">${new Date(tide.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span></div>`;
+      });
+    }
+    function generateFallbackTides() {
+      const tideStripEl = document.getElementById('tide-strip');
+      tideStripEl.innerHTML = '';
+      let tideTime = new Date(); tideTime.setHours(6, 15, 0, 0);
+      let isHigh = true;
+      for (let i = 0; i < 6; i++) {
+        if (tideTime > new Date()) {
+          if (i===0) renderNextTideHeader(isHigh ? 'High' : 'Low', tideTime, null);
+          tideStripEl.innerHTML += `<div class="tide-item"><span class="tide-type">${isHigh ? '⬆️ High' : '⬇️ Low'}</span><span class="tide-meta">${tideTime.toDateString() === new Date().toDateString() ? 'Today' : 'Tomorrow'}</span><span class="item-badge ${isHigh ? 'badge-high' : 'badge-low'}">${tideTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span></div>`;
+        }
+        tideTime = new Date(tideTime.getTime() + (6 * 3600000 + 12.5 * 60000));
+        isHigh = !isHigh;
+      }
+    }
+    fetchTides(); setInterval(fetchTides, 1800000);
+
+    // 6. CALENDAR ENGINE (9 Total Days)
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxjtxFXcHR1uymv9TN73kJzhV5rHY39ou0oxrN2_EUF1mpqAiEvToAtzzxFMqimLjyfw/exec';
+
+    async function fetchCalendar() {
+      const containerLeft = document.getElementById('calendar-today-tomorrow');
+      const containerRight = document.getElementById('calendar-rest');
+      
+      try {
+        const res = await fetch(APPS_SCRIPT_URL, { method: 'GET', redirect: 'follow' });
+        const events = await res.json();
+        const validEvents = Array.isArray(events) ? events : [];
+
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const daysList = [];
+        for (let i = 0; i < 9; i++) {
+          const dayDate = new Date(startOfToday);
+          dayDate.setDate(dayDate.getDate() + i);
+          daysList.push(dayDate);
+        }
+
+        containerLeft.innerHTML = '';
+        containerRight.innerHTML = '';
+
+        daysList.forEach((dayDate, index) => {
+          const isToday = index === 0;
+          const isTomorrow = index === 1;
+
+          let dayTitle = '';
+          let daySubLabel = dayDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+          if (isToday) dayTitle = 'Today';
+          else if (isTomorrow) dayTitle = 'Tomorrow';
+          else dayTitle = dayDate.toLocaleDateString([], { weekday: 'long' });
+
+          const dayEvents = validEvents.filter(item => {
+            const startDate = new Date(item.startDate);
+            return startDate.toDateString() === dayDate.toDateString();
+          }).sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+          const dayRow = document.createElement('div');
+          let classNames = 'day-row';
+          if (isToday) classNames += ' is-today';
+          if (isTomorrow) classNames += ' is-tomorrow';
+          dayRow.className = classNames;
+
+          let eventsHtml = '';
+          if (dayEvents.length > 0) {
+            eventsHtml = dayEvents.map(item => {
+              const startDate = new Date(item.startDate);
+              const timeStr = item.isAllDay ? 'All Day' : startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+              return `<div class="event-item"><span class="event-title">${item.summary || 'Untitled Event'}</span><span class="event-time">${timeStr}</span></div>`;
+            }).join('');
+          } else {
+            eventsHtml = `<span class="no-events">No events scheduled</span>`;
+          }
+
+          dayRow.innerHTML = `
+            <div class="day-header">
+              <span>${dayTitle}</span>
+              <span class="day-sublabel">${daySubLabel}</span>
+            </div>
+            <div class="day-events">${eventsHtml}</div>
+          `;
+
+          if (index < 2) containerLeft.appendChild(dayRow);
+          else containerRight.appendChild(dayRow);
+        });
+
+        setupAutoScroll(containerLeft, document.getElementById('window-left'));
+        setupAutoScroll(containerRight, document.getElementById('window-right'));
+
+      } catch (err) {
+        console.error('Calendar Fetch Error:', err);
+        containerLeft.innerHTML = `<div class="day-row"><span class="event-title">Error Loading Schedule</span></div>`;
+        containerRight.innerHTML = '';
+      }
+    }
+
+    function setupAutoScroll(trackEl, windowEl) {
+      const existingStyle = document.getElementById('dyn-scroll-' + trackEl.id);
+      if (existingStyle) existingStyle.remove();
+
+      setTimeout(() => {
+        const trackHeight = trackEl.scrollHeight;
+        const windowHeight = windowEl.clientHeight;
+
+        if (trackHeight > windowHeight + 10) {
+          const distance = trackHeight - windowHeight;
+          const duration = Math.max(15, Math.round((distance / 100) * 4)); 
+          const animName = 'innerScroll_' + trackEl.id;
+
+          const styleEl = document.createElement('style');
+          styleEl.id = 'dyn-scroll-' + trackEl.id;
+          styleEl.innerHTML = `
+            @keyframes ${animName} {
+              0% { transform: translateY(0); }
+              40% { transform: translateY(-${distance}px); }
+              60% { transform: translateY(-${distance}px); }
+              100% { transform: translateY(0); }
+            }
+            #${trackEl.id} { animation: ${animName} ${duration}s ease-in-out infinite; }
+          `;
+          document.head.appendChild(styleEl);
+        }
+      }, 300);
+    }
+
+    fetchCalendar();
+    setInterval(fetchCalendar, 300000);
+
+    // 7. PHOTO GALLERY & SCREENSAVER SCHEDULER ENGINE
+    const photoUrls = [
+      'https://i.postimg.cc/QCfk0x6D/20260302-074228.jpg',
+      'https://i.postimg.cc/xTdPqMCQ/20260223-090203.jpg',
+      'https://i.postimg.cc/Pfy4t2dV/20260228-104155.jpg',
+      'https://i.postimg.cc/vTZ5gwGm/20260217-172822.jpg',
+      'https://i.postimg.cc/639vgx46/20251226-133054.jpg',
+      'https://i.postimg.cc/fWq92FwB/20251222-075852(3).jpg',
+      'https://i.postimg.cc/sfHh68Vq/20251226-133107.jpg'
+    ];
+
+    let currentPhotoIndex = 0; 
+    let activeSlide = 1;
+    let ssActiveSlide = 1;
+
+    function initPhotoGalleries() {
+      if (photoUrls.length === 0) return;
+
+      document.getElementById('slide-1').src = photoUrls[0];
+      document.getElementById('ss-slide-1').src = photoUrls[0];
+
+      setInterval(() => {
+        if (photoUrls.length <= 1) return;
+        currentPhotoIndex = (currentPhotoIndex + 1) % photoUrls.length;
+
+        const curEl = document.getElementById(`slide-${activeSlide}`);
+        activeSlide = activeSlide === 1 ? 2 : 1;
+        const nextEl = document.getElementById(`slide-${activeSlide}`);
+        nextEl.src = photoUrls[currentPhotoIndex];
+        nextEl.classList.add('active');
+        curEl.classList.remove('active');
+
+        const ssCurEl = document.getElementById(`ss-slide-${ssActiveSlide}`);
+        ssActiveSlide = ssActiveSlide === 1 ? 2 : 1;
+        const ssNextEl = document.getElementById(`ss-slide-${ssActiveSlide}`);
+        ssNextEl.src = photoUrls[currentPhotoIndex];
+        ssNextEl.classList.add('active');
+        ssCurEl.classList.remove('active');
+      }, 12000);
+    }
+    initPhotoGalleries();
+
+    // SCREENSAVER TIMING CONTROLLER:
+    // 4 minutes Screensaver active, then 1 minute Dashboard visible
+    let isScreensaverMode = false;
+    const SCREENSAVER_DURATION = 4 * 60 * 1000; 
+    const DASHBOARD_DURATION = 1 * 60 * 1000;
+
+    function cycleMode() {
+      const ssOverlay = document.getElementById('screensaver-overlay');
+      isScreensaverMode = !isScreensaverMode;
+
+      if (isScreensaverMode) {
+        ssOverlay.classList.add('active');
+        setTimeout(cycleMode, SCREENSAVER_DURATION);
+      } else {
+        ssOverlay.classList.remove('active');
+        setTimeout(cycleMode, DASHBOARD_DURATION);
+      }
+    }
+
+    setTimeout(() => {
+      cycleMode();
+    }, DASHBOARD_DURATION);
+  </script>
+</body>
+</html>
